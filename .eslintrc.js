@@ -25,7 +25,7 @@ module.exports = {
     quotes: ['error', 'single'],
     //semi: ['error', 'always'],
     semi: 0,
-    'no-console': 1,
+    'no-console': 'off',
     'vue/html-indent': 'off'
   }
 }
