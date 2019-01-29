@@ -1,5 +1,5 @@
 <template>
-    <div style="max-width:400px">
+    <div style="width:320px">
         <b-list-group>
             <b-list-group-item href="#/new-project-page">New project</b-list-group-item>
             <b-list-group-item href="#/project-page">Projects</b-list-group-item>

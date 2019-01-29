@@ -1,5 +1,5 @@
 <template>
-  <div style="max-width:400px">
+  <div style="width:320px">
     <b-form @submit="onSubmit">
       <b-form-group id="username" label="Username:" label-for="username">
         <b-form-input
