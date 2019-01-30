@@ -12,9 +12,9 @@
                     Authorization
                 </b-nav-item>
             </b-navbar-nav>
-            
+
         </b-collapse>
-        
+
         <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
     </b-navbar>
 </template>
