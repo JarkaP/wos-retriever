@@ -43,9 +43,8 @@
 <script>
 import fs from 'fs';
 import slugify from 'slugify';
-import flatten from '@flatten/array';
-import parse from 'csv-parse/lib/sync';
 import globals from '../src/globals';
+import getRecordsID from '../src/utils';
 
 export default {
     name: 'new-project-page',
@@ -126,19 +125,9 @@ export default {
             return tempArray;
         },
 
-        getRecordsID: function(dataFile) {
-            let file = fs.readFileSync(dataFile, 'utf8');
-
-            let wosIDs = parse(file, {
-                skip_empty_lines: true
-            });
-
-            return flatten(wosIDs);
-        },
-
         chunkInputData: function(datafile, dir) {
             let self = this;
-            let data = self.getRecordsID(datafile);
+            let data = getRecordsID(datafile);
             let uids = self.chunkArray(data, globals.idLimit);
             let results = [];
             for (let i = 0; i < uids.length; i++) {
