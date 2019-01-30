@@ -68,7 +68,14 @@ export default {
                 lower: true
             });
             let dir = globals.homedir + '/wos-retriever/' + projectName;
-
+            let results = [
+                {
+                    name: projectName
+                },
+                {
+                    dir: dir
+                }
+            ];
             if (!fs.existsSync(globals.homedir + '/wos-retriever')) {
                 fs.mkdirSync(globals.homedir + '/wos-retriever');
             }
@@ -85,13 +92,26 @@ export default {
                 dir + '/chunks/'
             );
 
-            if (!chunks) {
-                self.error = 'Something went wrong';
-            } else {
+            if (Array.isArray(chunks)) {
                 self.path = dir;
                 self.error = false;
                 self.success = true;
+                fs.writeFileSync(
+                    dir + '/wos-retriver-project.json',
+                    JSON.stringify(results),
+                    'utf8',
+                    err => {
+                        if (err) {
+                            return console.error(err);
+                        }
+                        console.log('File has been created');
+                    }
+                );
+            } else {
+                self.error = 'Something went wrong';
             }
+
+            return;
         },
 
         chunkArray: function(originalArray, chunkSize) {
@@ -123,11 +143,8 @@ export default {
             let uids = self.chunkArray(data, globals.idLimit);
             let results = [];
             for (let i = 0; i < uids.length; i++) {
-                console.log(uids[i]);
                 let filepath = dir + 'data-' + i;
-
                 fs.openSync(filepath, 'w');
-
                 let file = fs.createWriteStream(filepath);
 
                 file.on('error', function(err) {
