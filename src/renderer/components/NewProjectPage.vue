@@ -70,10 +70,9 @@ export default {
             let dir = globals.homedir + '/wos-retriever/' + projectName;
             let results = [
                 {
-                    name: projectName
-                },
-                {
-                    dir: dir
+                    name: projectName,
+                    dir: dir,
+                    id: Math.floor(new Date() / 1000)
                 }
             ];
             if (!fs.existsSync(globals.homedir + '/wos-retriever')) {
