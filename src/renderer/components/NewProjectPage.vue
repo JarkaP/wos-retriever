@@ -133,82 +133,82 @@ export default {
             /*
             var parsedRecord = [];
             var x;
-
+            
             var r = {
-                uid: record.UID,
-                pubyear: record.static_data.summary.pub_info.$.pubyear,
-                citation:
-                    record.dynamic_data.citation_related.tc_list.silo_tc.$
-                        .local_count,
-                doi: '',
-                issn: '',
-                subjects: '',
-                doctype: '',
-            };
+            uid: record.UID,
+            pubyear: record.static_data.summary.pub_info.$.pubyear,
+            citation:
+            record.dynamic_data.citation_related.tc_list.silo_tc.$
+            .local_count,
+            doi: '',
+            issn: '',
+            subjects: '',
+            doctype: '',
+        };
+        
+        var identifiers =
+        record.dynamic_data.cluster_related.identifiers.identifier;
+        console.log(identifiers);
+        console.log(typeof identifiers);
+        if (identifiers != null) {
+        if (Object.keys(identifiers).length > 1) {
+        for (x = 0; x < Object.keys(identifiers).length; x++) {
+        if (identifiers[x].$.type === 'issn') {
+        r.issn = String(identifiers[x].$.value);
+    }
+    if (identifiers[x].$.type === 'xref_doi') {
+    r.doi = String(identifiers[x].$.value);
+}
+if (identifiers[x].$.type === 'doi') {
+r.doi = String(identifiers[x].$.value);
+}
+}
+} else if (Object.keys(identifiers).length === 1) {
+if (identifiers.$.type === 'issn') {
+r.issn = String(identifiers.$.value);
+}
+if (identifiers[x].$.type === 'xref_doi') {
+r.doi = String(identifiers[x].$.value);
+}
+if (identifiers.$.type === 'doi') {
+r.doi = String(identifiers.$.value);
+}
+}
+}
 
-            var identifiers =
-                record.dynamic_data.cluster_related.identifiers.identifier;
-            console.log(identifiers);
-            console.log(typeof identifiers);
-            if (identifiers != null) {
-                if (Object.keys(identifiers).length > 1) {
-                    for (x = 0; x < Object.keys(identifiers).length; x++) {
-                        if (identifiers[x].$.type === 'issn') {
-                            r.issn = String(identifiers[x].$.value);
-                        }
-                        if (identifiers[x].$.type === 'xref_doi') {
-                            r.doi = String(identifiers[x].$.value);
-                        }
-                        if (identifiers[x].$.type === 'doi') {
-                            r.doi = String(identifiers[x].$.value);
-                        }
-                    }
-                } else if (Object.keys(identifiers).length === 1) {
-                    if (identifiers.$.type === 'issn') {
-                        r.issn = String(identifiers.$.value);
-                    }
-                    if (identifiers[x].$.type === 'xref_doi') {
-                        r.doi = String(identifiers[x].$.value);
-                    }
-                    if (identifiers.$.type === 'doi') {
-                        r.doi = String(identifiers.$.value);
-                    }
-                }
-            }
+var subjects =
+record.static_data.fullrecord_metadata.category_info.subjects
+.subject;
+var subjectsArr = [];
+if (subjects != null) {
+for (x = 0; x < subjects.length; x++) {
+if (subjects[x].$.ascatype === 'traditional') {
+subjectsArr.push(
+subjects[x][Object.keys(subjects[x])[0]].replace(
+/&amp;/g,
+'&'
+)
+);
+}
+}
+}
+if (subjectsArr.length > 0) {
+r.subjects = subjectsArr.join('; ');
+}
 
-            var subjects =
-                record.static_data.fullrecord_metadata.category_info.subjects
-                    .subject;
-            var subjectsArr = [];
-            if (subjects != null) {
-                for (x = 0; x < subjects.length; x++) {
-                    if (subjects[x].$.ascatype === 'traditional') {
-                        subjectsArr.push(
-                            subjects[x][Object.keys(subjects[x])[0]].replace(
-                                /&amp;/g,
-                                '&'
-                            )
-                        );
-                    }
-                }
-            }
-            if (subjectsArr.length > 0) {
-                r.subjects = subjectsArr.join('; ');
-            }
+var doctypes = record.static_data.summary.doctypes.doctype;
+if (doctypes != null) {
+if (Array.isArray(doctypes)) {
+r.doctype = doctypes.join('; ');
+} else {
+r.doctype = doctypes;
+}
+}
 
-            var doctypes = record.static_data.summary.doctypes.doctype;
-            if (doctypes != null) {
-                if (Array.isArray(doctypes)) {
-                    r.doctype = doctypes.join('; ');
-                } else {
-                    r.doctype = doctypes;
-                }
-            }
-
-            Object.keys(r).map(function(key) {
-                parsedRecord.push('"' + r[key] + '"');
-            });
-            */
+Object.keys(r).map(function(key) {
+parsedRecord.push('"' + r[key] + '"');
+});
+*/
         },
 
         saveToCSV: function(data, file) {
@@ -276,15 +276,13 @@ export default {
                                         file
                                     );
 
-                                    setTimeout(function() {
-                                        self.loopRequest(
-                                            queryId,
-                                            index + 1,
-                                            indexMax,
-                                            file,
-                                            pass
-                                        );
-                                    }, globals.timeLimit);
+                                    self.loopRequest(
+                                        queryId,
+                                        index + 1,
+                                        indexMax,
+                                        file,
+                                        pass
+                                    );
                                     return;
                                 }
                             }
