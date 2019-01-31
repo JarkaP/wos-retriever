@@ -259,31 +259,40 @@ parsedRecord.push('"' + r[key] + '"');
                             self.xmlOptions,
                             function(err, result) {
                                 if (err) {
-                                    self.progress.downloading = false;
-                                    return (self.error = err);
-                                }
-
-                                let soapBody = result.Envelope.Body;
-
-                                if (soapBody.retrieveResponse == null) {
-                                    self.progress.downloading = false;
-                                    return (self.error =
-                                        soapBody.Fault.faultstring);
+                                    self.error = err;
+                                    console.log('retry');
+                                    setTimeout(function() {
+                                        self.loopRequest(
+                                            queryId,
+                                            index,
+                                            indexMax,
+                                            file,
+                                            pass
+                                        );
+                                    }, globals.timeLimit);
                                 } else {
-                                    self.saveToCSV(
-                                        soapBody.retrieveResponse.return
-                                            .records,
-                                        file
-                                    );
+                                    let soapBody = result.Envelope.Body;
 
-                                    self.loopRequest(
-                                        queryId,
-                                        index + 1,
-                                        indexMax,
-                                        file,
-                                        pass
-                                    );
-                                    return;
+                                    if (soapBody.retrieveResponse == null) {
+                                        self.progress.downloading = false;
+                                        return (self.error =
+                                            soapBody.Fault.faultstring);
+                                    } else {
+                                        self.saveToCSV(
+                                            soapBody.retrieveResponse.return
+                                                .records,
+                                            file
+                                        );
+
+                                        self.loopRequest(
+                                            queryId,
+                                            index + 1,
+                                            indexMax,
+                                            file,
+                                            pass
+                                        );
+                                        return;
+                                    }
                                 }
                             }
                         );
