@@ -1,13 +1,13 @@
-import Vue from 'vue'
-import Router from 'vue-router'
+import Vue from 'vue';
+import Router from 'vue-router';
 
-Vue.use(Router)
+Vue.use(Router);
 
 export default new Router({
     routes: [
         {
             path: '/',
-            name: 'landing-page',
+            name: 'new-project-page',
             component: require('@/components/LandingPage').default
         },
         {
@@ -21,13 +21,8 @@ export default new Router({
             component: require('@/components/NewProjectPage').default
         },
         {
-            path: '/project-page',
-            name: 'project-page',
-            component: require('@/components/ProjectPage').default
-        },
-        {
             path: '*',
             redirect: '/'
         }
     ]
-})
+});
