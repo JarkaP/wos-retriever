@@ -2,6 +2,10 @@
     <div style="width:320px">
         <h3 class="mb-3">Project</h3>
 
+        <b-alert variant="success" :show="success">
+            Data saved.
+        </b-alert>
+
         <b-alert variant="info" :show="downloading">
             Records found: {{ progress.recordsFound }}
             <br />
@@ -108,21 +112,103 @@ export default {
             return dir + '/result/' + name + '.csv';
         },
 
-        saveToCSV: function(data) {
-            return data;
-        },
-
-        loopRequest: function(queryId) {
-            console.log(queryId);
-        },
-
-        initialRequest: function(data, file, callback) {
+        saveToCSV: function(data, file) {
+            data = data.records.REC;
             let self = this;
-            console.log(data);
+            let length = data.length;
+            let i = 0;
+            for (i; i < length; i++) {
+                self.progress.recordsSaved++;
+                console.log(data[i]);
+            }
+            console.log(file);
+            //console.log(data);
+        },
+
+        loopRequest: function(queryId, index, indexMax, file, pass) {
+            let self = this;
+            let firstRecord = globals.countLimit;
+            firstRecord = firstRecord + globals.countLimit * index;
+
+            let searchParams = {
+                queryId: queryId,
+                retrieveParameters: {
+                    firstRecord: parseInt(firstRecord) + 1,
+                    count: globals.countLimit
+                }
+            };
+            if (index < indexMax) {
+                soap.createClient(globals.searchUrl, function(err, client) {
+                    if (err) {
+                        self.downloading = false;
+                        return (self.error = err);
+                    }
+
+                    self.addSIDHeader(client, pass);
+
+                    client.retrieve(searchParams, function(
+                        err,
+                        result,
+                        rawResponse
+                    ) {
+                        xml2js.parseString(
+                            self.decodePointyBrackets(rawResponse),
+                            self.xmlOptions,
+                            function(err, result) {
+                                if (err) {
+                                    self.downloading = false;
+                                    return (self.error = err);
+                                }
+
+                                let soapBody = result.Envelope.Body;
+
+                                if (soapBody.retrieveResponse == null) {
+                                    self.downloading = false;
+                                    return (self.error =
+                                        soapBody.Fault.faultstring);
+                                } else {
+                                    self.saveToCSV(
+                                        soapBody.retrieveResponse.return
+                                            .records,
+                                        file
+                                    );
+
+                                    setTimeout(function() {
+                                        self.loopRequest(
+                                            queryId,
+                                            index + 1,
+                                            indexMax,
+                                            file,
+                                            pass
+                                        );
+                                    }, globals.timeLimit);
+                                    return;
+                                }
+                            }
+                        );
+                    });
+                });
+            } else {
+                self.downloading = false;
+                self.success = true;
+                console.log('done!');
+                return;
+            }
+        },
+
+        initialRequest: function(data, file, pass, callback) {
+            let self = this;
             data = data.retrieveByIdResponse.return;
             self.progress.recordsFound = data.recordsFound;
-            self.saveToCSV(data.records);
-            callback(data.queryId);
+            self.progress.recordsSaved = 0;
+            let loopSize =
+                parseInt(
+                    (data.recordsFound - globals.countLimit) /
+                        globals.countLimit
+                ) + 1;
+
+            self.saveToCSV(data.records, file);
+            callback(data.queryId, 0, loopSize, file, pass);
         },
 
         createRequest: function(uids, name, dir) {
@@ -179,6 +265,7 @@ export default {
                                 self.initialRequest(
                                     soapBody,
                                     file,
+                                    pass,
                                     self.loopRequest
                                 );
                             }
@@ -216,7 +303,6 @@ export default {
                 function(file) {
                     fs.readFile(file[0], (err, data) => {
                         if (err) {
-                            console.log(err);
                             return (self.error = err);
                         }
                         let projectData = JSON.parse(data)[0];
