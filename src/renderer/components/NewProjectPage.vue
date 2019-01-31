@@ -2,9 +2,8 @@
     <div style="width:320px">
         <h3 class="mb-3">Create New Project</h3>
 
-        <b-alert variant="success" :show="success != false">
-            Successfully created project <br />
-            {{ path }}
+        <b-alert variant="info" :show="success != false" dismissible>
+            <span v-html="success"></span>
         </b-alert>
 
         <b-alert variant="danger" :show="error != false">
@@ -22,6 +21,45 @@
                 </b-form-input>
             </b-form-group>
 
+            <b-form-group id="query" label="Search query:" label-for="query">
+                <b-form-textarea
+                    required
+                    id="query"
+                    v-model="form.query"
+                    :rows="3"
+                    :max-rows="6"
+                >
+                </b-form-textarea>
+            </b-form-group>
+
+            <b-form-group
+                id="begin"
+                label="Publication date – begin:"
+                label-for="begin"
+            >
+                <b-form-input
+                    v-model="form.begin"
+                    type="date"
+                    required
+                    min="1800-01-01"
+                    max="2025-12-31"
+                ></b-form-input>
+            </b-form-group>
+
+            <b-form-group
+                id="end"
+                label="Publication date – end:"
+                label-for="end"
+            >
+                <b-form-input
+                    v-model="form.end"
+                    type="date"
+                    required
+                    min="1800-01-01"
+                    max="2025-12-31"
+                ></b-form-input>
+            </b-form-group>
+
             <b-button type="submit" variant="primary">Submit</b-button>
         </b-form>
     </div>
@@ -37,13 +75,16 @@ export default {
     data() {
         return {
             form: {
-                name: ''
+                name: '',
+                query: '',
+                begin: '2010-01-01',
+                end: '2025-12-31'
             },
             error: false,
-            success: false,
-            path: ''
+            success: false
         };
     },
+
     methods: {
         onSubmit: function() {
             let self = this;
@@ -56,7 +97,12 @@ export default {
                 {
                     name: projectName,
                     dir: dir,
-                    id: Math.floor(new Date() / 1000)
+                    id: Math.floor(new Date() / 1000),
+                    data: {
+                        query: JSON.stringify(self.form.query),
+                        begin: self.form.begin,
+                        end: self.form.end
+                    }
                 }
             ];
             if (!fs.existsSync(globals.homedir + '/wos-retriever')) {
@@ -68,20 +114,28 @@ export default {
             }
 
             fs.mkdirSync(dir);
-            fs.mkdirSync(dir + '/results');
 
             fs.writeFileSync(
-                dir + '/' + projectName + '.json',
+                dir + '/metadata.json',
                 JSON.stringify(results),
                 'utf8',
                 err => {
                     if (err) {
                         return (self.error = false);
                     }
-                    console.log('File has been created');
+                    console.log('Metadata file has been created');
                 }
             );
 
+            fs.writeFileSync(dir + '/results.csv', '', 'utf8', err => {
+                if (err) {
+                    return (self.error = false);
+                }
+                console.log('Results file has been created');
+            });
+
+            self.error = false;
+            self.success = 'Project created. <br>' + dir;
             return;
         }
     }
