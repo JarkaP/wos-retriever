@@ -22,19 +22,6 @@
                 </b-form-input>
             </b-form-group>
 
-            <b-form-group id="datafile" label="Data:" label-for="datafile">
-                <b-form-file
-                    v-model="form.datafile"
-                    plain
-                    accept=".txt, .csv"
-                    required
-                >
-                </b-form-file>
-                <div class="mt-1">
-                    Selected file: {{ form.datafile && form.datafile.name }}
-                </div>
-            </b-form-group>
-
             <b-button type="submit" variant="primary">Submit</b-button>
         </b-form>
     </div>
@@ -44,15 +31,13 @@
 import fs from 'fs';
 import slugify from 'slugify';
 import globals from '../src/globals';
-import getRecordsID from '../src/utils';
 
 export default {
     name: 'new-project-page',
     data() {
         return {
             form: {
-                name: '',
-                datafile: null
+                name: ''
             },
             error: false,
             success: false,
@@ -83,76 +68,21 @@ export default {
             }
 
             fs.mkdirSync(dir);
-            fs.mkdirSync(dir + '/chunks');
+            fs.mkdirSync(dir + '/results');
 
-            let chunks = self.chunkInputData(
-                self.form.datafile.path,
-                dir + '/chunks/'
+            fs.writeFileSync(
+                dir + '/' + projectName + '.json',
+                JSON.stringify(results),
+                'utf8',
+                err => {
+                    if (err) {
+                        return (self.error = false);
+                    }
+                    console.log('File has been created');
+                }
             );
 
-            if (Array.isArray(chunks)) {
-                self.path = dir;
-                self.error = false;
-                self.success = true;
-                fs.writeFileSync(
-                    dir + '/wos-retriver-project.json',
-                    JSON.stringify(results),
-                    'utf8',
-                    err => {
-                        if (err) {
-                            return console.error(err);
-                        }
-                        console.log('File has been created');
-                    }
-                );
-            } else {
-                self.error = 'Something went wrong';
-            }
-
             return;
-        },
-
-        chunkArray: function(originalArray, chunkSize) {
-            let index = 0;
-            let arrayLength = originalArray.length;
-            let tempArray = [];
-
-            for (index = 0; index < arrayLength; index += chunkSize) {
-                let chunk = originalArray.slice(index, index + chunkSize);
-                tempArray.push(chunk);
-            }
-
-            return tempArray;
-        },
-
-        chunkInputData: function(datafile, dir) {
-            let self = this;
-            let data = getRecordsID(datafile);
-            let uids = self.chunkArray(data, globals.idLimit);
-            let results = [];
-            for (let i = 0; i < uids.length; i++) {
-                let filepath = dir + 'data-' + i;
-                fs.openSync(filepath, 'w');
-                let file = fs.createWriteStream(filepath);
-
-                file.on('error', function(err) {
-                    console.log(err);
-                    return false;
-                });
-
-                uids[i].forEach(function(v) {
-                    file.write(v + '\n');
-                });
-
-                file.on('finish', function() {
-                    results.push(filepath);
-                    console.log('chunk ' + i + ' created');
-                });
-
-                file.end();
-            }
-
-            return results;
         }
     }
 };
