@@ -5,14 +5,10 @@
                 <b-nav-item href="#/new-project-page">
                     New project
                 </b-nav-item>
-                <b-nav-item href="#/project-page" >
-                    Projects
-                </b-nav-item>
                 <b-nav-item href="#/login-page">
                     Authorization
                 </b-nav-item>
             </b-navbar-nav>
-
         </b-collapse>
 
         <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
@@ -20,8 +16,7 @@
 </template>
 
 <script>
-
 export default {
-    name: 'navigation',
-}
+    name: 'navigation'
+};
 </script>
