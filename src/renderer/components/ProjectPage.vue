@@ -122,7 +122,6 @@ export default {
                 console.log(data[i]);
             }
             console.log(file);
-            //console.log(data);
         },
 
         loopRequest: function(queryId, index, indexMax, file, pass) {
