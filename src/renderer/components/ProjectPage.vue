@@ -18,7 +18,7 @@
 
         <button v-if="!project.open" @click="loadProject">Load project</button>
         <div v-else>
-            <b-alert :show="project.open" dismissible variant="success">
+            <b-alert :show="project.open" dismissible variant="info">
                 Project loaded.
             </b-alert>
 
@@ -119,9 +119,22 @@ export default {
             let i = 0;
             for (i; i < length; i++) {
                 self.progress.recordsSaved++;
+                //let uid = data[i].UID;
                 console.log(data[i]);
             }
             console.log(file);
+        },
+
+        getCitedReferences: function(wosID, index, indexMax) {
+            let self = this;
+            if (index < indexMax) {
+                setTimeout(function() {
+                    self.getCitedReferences(index + 1, indexMax);
+                }, globals.timeLimit);
+                return;
+            } else {
+                console.log('done');
+            }
         },
 
         loopRequest: function(queryId, index, indexMax, file, pass) {
