@@ -191,6 +191,9 @@ export default {
                 self.downloading = false;
                 self.success = true;
                 console.log('done!');
+                new Notification('WOS', {
+                    body: 'Download completed'
+                });
                 return;
             }
         },
