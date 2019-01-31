@@ -9,7 +9,7 @@ const authUrl =
 
 const countLimit = 100;
 const idLimit = 15000;
-const timeLimit = 800;
+const timeLimit = 1000;
 const wosEditions = [
     {
         collection: 'WOS',
