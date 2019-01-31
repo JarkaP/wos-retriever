@@ -343,8 +343,8 @@ parsedRecord.push('"' + r[key] + '"');
                     userQuery: retrieveParameters.query,
                     editions: globals.wosEditions,
                     timeSpan: {
-                        begin: self.formatTimeSpan(retrieveParameters.begin),
-                        end: self.formatTimeSpan(retrieveParameters.end)
+                        begin: retrieveParameters.begin,
+                        end: retrieveParameters.end
                     },
                     queryLanguage: 'en'
                 },
@@ -465,11 +465,6 @@ parsedRecord.push('"' + r[key] + '"');
                 dir
             );
             return;
-        },
-
-        formatTimeSpan: function(time) {
-            return time;
-            //return time.toISOString().split('T')[0];
         },
 
         decodePointyBrackets: function(encodedString) {
