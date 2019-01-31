@@ -80,7 +80,6 @@
 import fs from 'fs';
 import slugify from 'slugify';
 import globals from '../src/globals';
-
 import soap from 'soap';
 import xml2js from 'xml2js';
 
@@ -126,6 +125,8 @@ export default {
                     subjects: '',
                     doctype: ''
                 };
+
+                let parsedRecordRow = [];
 
                 let identifiers =
                     record.dynamic_data.cluster_related.identifiers.identifier;
@@ -198,7 +199,11 @@ export default {
                     }
                 }
 
-                return parsedRecord;
+                Object.keys(parsedRecord).map(function(key) {
+                    parsedRecordRow.push('"' + parsedRecord[key] + '"');
+                });
+
+                return parsedRecordRow;
             } catch (e) {
                 console.log(record.UID, e);
                 return false;
@@ -214,12 +219,28 @@ export default {
                 let parsed = self.parseSingleRecord(data[i]);
                 if (parsed) {
                     self.progress.recordsSaved++;
-                    console.log(parsed);
+
+                    fs.open(file, 'a', 666, function(err, id) {
+                        if (err) {
+                            return (self.error = err);
+                        }
+                        fs.write(
+                            id,
+                            parsed.join('\t') + '\n',
+                            null,
+                            'utf8',
+                            function(err2) {
+                                if (err2) {
+                                    return (self.error = err2);
+                                }
+                                fs.close(id, function() {});
+                            }
+                        );
+                    });
                 } else {
                     self.progress.failed.push(data[i].UID);
                 }
             }
-            console.log(file);
         },
 
         loopRequest: function(queryId, index, indexMax, file, pass) {
