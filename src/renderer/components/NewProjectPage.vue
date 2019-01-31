@@ -109,6 +109,9 @@ export default {
         };
     },
 
+    mounted: function() {
+        this.loadLastQuery();
+    },
     methods: {
         parseSingleRecord: function(record) {
             try {
@@ -133,7 +136,7 @@ export default {
             /*
             var parsedRecord = [];
             var x;
-            
+
             var r = {
             uid: record.UID,
             pubyear: record.static_data.summary.pub_info.$.pubyear,
@@ -145,7 +148,7 @@ export default {
             subjects: '',
             doctype: '',
         };
-        
+
         var identifiers =
         record.dynamic_data.cluster_related.identifiers.identifier;
         console.log(identifiers);
@@ -398,6 +401,11 @@ parsedRecord.push('"' + r[key] + '"');
 
         onSubmit: function() {
             let self = this;
+
+            localStorage.query = self.form.query;
+            localStorage.end = self.form.end;
+            localStorage.begin = self.form.begin;
+
             let projectName = slugify(self.form.name, {
                 replacement: '-',
                 lower: true
@@ -415,6 +423,7 @@ parsedRecord.push('"' + r[key] + '"');
                     }
                 }
             ];
+
             if (!fs.existsSync(globals.homedir + '/wos-retriever')) {
                 fs.mkdirSync(globals.homedir + '/wos-retriever');
             }
@@ -472,6 +481,18 @@ parsedRecord.push('"' + r[key] + '"');
         addSIDHeader: function(client, sidCookie) {
             client.addHttpHeader('Cookie', 'SID=' + sidCookie);
             client.addHttpHeader('Content-Type', 'text/xml; charset=utf-8');
+        },
+
+        loadLastQuery: function() {
+            if (localStorage.getItem('query')) {
+                this.form.query = localStorage.getItem('query');
+            }
+            if (localStorage.getItem('begin')) {
+                this.form.begin = localStorage.getItem('begin');
+            }
+            if (localStorage.getItem('end')) {
+                this.form.end = localStorage.getItem('end');
+            }
         }
     }
 };
