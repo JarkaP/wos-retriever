@@ -284,7 +284,7 @@ export default {
                                             file,
                                             pass
                                         );
-                                    }, globals.timeLimit);
+                                    }, globals.timeLimit * 2);
                                 } else {
                                     let soapBody = result.Envelope.Body;
 
@@ -299,13 +299,15 @@ export default {
                                             file
                                         );
 
-                                        self.loopRequest(
-                                            queryId,
-                                            index + 1,
-                                            indexMax,
-                                            file,
-                                            pass
-                                        );
+                                        setTimeout(function() {
+                                            self.loopRequest(
+                                                queryId,
+                                                index + 1,
+                                                indexMax,
+                                                file,
+                                                pass
+                                            );
+                                        }, globals.timeLimit);
                                         return;
                                     }
                                 }
