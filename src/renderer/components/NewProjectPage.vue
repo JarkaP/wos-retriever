@@ -17,6 +17,15 @@
             <span v-html="success"></span>
         </b-alert>
 
+        <b-alert
+            variant="warning"
+            :show="retry != false && success != false"
+            dismissible
+        >
+            <h4>Warning</h4>
+            {{ retry }}
+        </b-alert>
+
         <b-alert variant="danger" :show="error != false">
             {{ error }}
         </b-alert>
@@ -91,20 +100,21 @@ export default {
                 name: '',
                 query: '',
                 begin: '2010-01-01',
-                end: '2025-12-31'
+                end: '2025-12-31',
             },
             error: false,
+            retry: false,
             success: false,
             progress: {
                 downloading: false,
                 recordsFound: 0,
                 recordsSaved: 0,
-                failed: []
+                failed: [],
             },
             xmlOptions: {
                 explicitArray: false,
-                tagNameProcessors: [xml2js.processors.stripPrefix]
-            }
+                tagNameProcessors: [xml2js.processors.stripPrefix],
+            },
         };
     },
 
@@ -123,7 +133,7 @@ export default {
                     doi: '',
                     issn: '',
                     subjects: '',
-                    doctype: ''
+                    doctype: '',
                 };
 
                 let parsedRecordRow = [];
@@ -252,8 +262,8 @@ export default {
                 queryId: queryId,
                 retrieveParameters: {
                     firstRecord: parseInt(firstRecord) + 1,
-                    count: globals.countLimit
-                }
+                    count: globals.countLimit,
+                },
             };
             if (index < indexMax) {
                 soap.createClient(globals.searchUrl, function(err, client) {
@@ -274,8 +284,7 @@ export default {
                             self.xmlOptions,
                             function(err, result) {
                                 if (err) {
-                                    self.error = err;
-                                    console.log('retry');
+                                    self.retry = err;
                                     setTimeout(function() {
                                         self.loopRequest(
                                             queryId,
@@ -289,9 +298,16 @@ export default {
                                     let soapBody = result.Envelope.Body;
 
                                     if (soapBody.retrieveResponse == null) {
-                                        self.progress.downloading = false;
-                                        return (self.error =
-                                            soapBody.Fault.faultstring);
+                                        setTimeout(function() {
+                                            self.loopRequest(
+                                                queryId,
+                                                index,
+                                                indexMax,
+                                                file,
+                                                pass
+                                            );
+                                        }, globals.timeLimit * 2);
+                                        self.retry = soapBody.Fault.faultstring;
                                     } else {
                                         self.saveToCSV(
                                             soapBody.retrieveResponse.return
@@ -319,7 +335,7 @@ export default {
                 self.progress.downloading = false;
                 self.success = 'Download completed. <br>' + file;
                 new Notification('WOS', {
-                    body: 'Download completed'
+                    body: 'Download completed',
                 });
                 return;
             }
@@ -358,9 +374,9 @@ export default {
                     editions: globals.wosEditions,
                     timeSpan: {
                         begin: retrieveParameters.begin,
-                        end: retrieveParameters.end
+                        end: retrieveParameters.end,
                     },
-                    queryLanguage: 'en'
+                    queryLanguage: 'en',
                 },
                 retrieveParameters: {
                     firstRecord: 1,
@@ -368,9 +384,9 @@ export default {
                     option: {
                         key: 'targetNamespace',
                         value:
-                            'http://scientific.thomsonreuters.com/schema/wok5.4/public/FullRecord'
-                    }
-                }
+                            'http://scientific.thomsonreuters.com/schema/wok5.4/public/FullRecord',
+                    },
+                },
             };
 
             self.progress.downloading = true;
@@ -422,7 +438,7 @@ export default {
 
             let projectName = slugify(self.form.name, {
                 replacement: '-',
-                lower: true
+                lower: true,
             });
             let dir = globals.homedir + '/wos-retriever/' + projectName;
             let results = [
@@ -433,9 +449,9 @@ export default {
                     data: {
                         query: JSON.stringify(self.form.query),
                         begin: self.form.begin,
-                        end: self.form.end
-                    }
-                }
+                        end: self.form.end,
+                    },
+                },
             ];
 
             if (!fs.existsSync(globals.homedir + '/wos-retriever')) {
@@ -478,7 +494,7 @@ export default {
                 {
                     query: self.form.query,
                     begin: self.form.begin,
-                    end: self.form.end
+                    end: self.form.end,
                 },
                 dir
             );
@@ -506,7 +522,7 @@ export default {
             if (localStorage.getItem('end')) {
                 this.form.end = localStorage.getItem('end');
             }
-        }
-    }
+        },
+    },
 };
 </script>
